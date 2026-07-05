@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TAMAANI · Кейс Сараяку</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;0,800;1,500&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --forest-deep:#0E2117;
+  --forest:#16311F;
+  --forest-panel:#1B3A26;
+  --forest-line:#2C5136;
+  --paper:#F0E8D3;
+  --paper-dim:#B9C2A6;
+  --paper-faint:#8B987E;
+  --achiote:#E0532F;      /* компания / давление проекта */
+  --achiote-soft:#F0794F;
+  --river:#5FA8A0;        /* община */
+  --river-soft:#8AC7BE;
+  --kapok:#E4C97E;        /* нарушения / акценты */
+  --danger-zone:#7E2A16;
+  --safe-zone:#3F7A4C;
+  --serif:"Alegreya", Georgia, "Times New Roman", serif;
+  --sans:"Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--forest-deep);
+  color:var(--paper);
+  font-family:var(--sans);
+  font-size:18px;
+  line-height:1.55;
+  min-height:100vh;
+}
+body::before{ /* тонкая текстура тропического полога */
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;z-index:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 15% -5%, rgba(95,168,160,.10), transparent 60%),
+    radial-gradient(ellipse 50% 35% at 90% 0%, rgba(228,201,126,.07), transparent 60%);
+}
+#app{position:relative;z-index:1;max-width:880px;margin:0 auto;padding:0 20px 90px}
+
+/* ---------- шапка ---------- */
+header.masthead{padding:26px 0 10px;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.masthead h1{
+  font-family:var(--serif);font-weight:800;font-size:30px;letter-spacing:.04em;line-height:1.1;
+}
+.masthead h1 small{
+  display:block;font-family:var(--sans);font-weight:500;font-size:13px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--kapok);margin-bottom:6px;
+}
+.masthead .case{color:var(--paper-dim);font-size:14px;margin-left:auto;text-align:right;max-width:280px}
+.masthead svg{flex:none}
+
+/* ---------- панель состояния ---------- */
+.dash{
+  position:sticky;top:0;z-index:50;
+  background:linear-gradient(180deg, var(--forest-deep) 82%, transparent);
+  padding:12px 0 18px;
+}
+.dash-inner{
+  background:var(--forest);border:1px solid var(--forest-line);border-radius:14px;
+  padding:16px 18px 14px;box-shadow:0 8px 30px rgba(0,0,0,.35);
+}
+.gauge-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.gauge-head .glabel{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper-dim)}
+.gauge-head .gval{font-family:var(--serif);font-size:26px;font-weight:800}
+.gauge-head .gval .of{font-size:15px;color:var(--paper-faint);font-weight:500}
+.gauge-head .gdelta{font-family:var(--serif);font-weight:800;font-size:18px;margin-left:10px;opacity:0;transition:opacity .3s}
+.gauge-head .gdelta.show{opacity:1}
+.gauge-head .gdelta.up{color:var(--achiote-soft)}
+.gauge-head .gdelta.down{color:var(--river-soft)}
+
+.gauge{position:relative;height:30px;border-radius:8px;overflow:hidden;background:#122B1C;border:1px solid var(--forest-line)}
+.gauge .zone{position:absolute;top:0;bottom:0}
+.gauge .zone.safe{left:0;width:20%;background:linear-gradient(90deg, rgba(63,122,76,.55), rgba(63,122,76,.15))}
+.gauge .zone.hot{right:0;width:16%;background:linear-gradient(90deg, rgba(126,42,22,.15), rgba(126,42,22,.75))}
+.gauge .fill{
+  position:absolute;left:0;top:0;bottom:0;
+  background:linear-gradient(90deg, rgba(224,83,47,.28), rgba(224,83,47,.72));
+  transition:width .7s cubic-bezier(.25,.9,.3,1.15);
+}
+.gauge .marker{
+  position:absolute;top:-2px;bottom:-2px;width:4px;background:var(--paper);border-radius:2px;
+  box-shadow:0 0 10px rgba(240,232,211,.6);
+  transition:left .7s cubic-bezier(.25,.9,.3,1.15);
+}
+.gauge .tick{position:absolute;top:0;bottom:0;width:1px;background:rgba(240,232,211,.14)}
+.gauge-legend{display:flex;justify-content:space-between;font-size:12px;color:var(--paper-faint);margin-top:5px}
+.gauge-legend .end{color:var(--achiote-soft)}
+.gauge-legend .start{color:#8FCB9B}
+
+.dash-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.res{
+  flex:1;min-width:120px;background:var(--forest-panel);border:1px solid var(--forest-line);
+  border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:10px;
+}
+.res svg{flex:none;opacity:.9}
+.res .rname{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--paper-dim)}
+.res .rpips{display:flex;gap:4px;margin-top:3px}
+.res .pip{width:14px;height:8px;border-radius:3px;background:var(--river);transition:all .3s}
+.res .pip.off{background:transparent;border:1px solid var(--forest-line)}
+.res.drained .rname{color:var(--achiote-soft)}
+
+.vio-strip{margin-top:12px}
+.vio-strip .vhead{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--paper-dim);margin-bottom:6px;display:flex;gap:8px;align-items:center}
+.vio-strip .vcount{font-family:var(--serif);font-weight:800;font-size:16px;color:var(--kapok)}
+.vio-tags{display:flex;flex-wrap:wrap;gap:6px}
+.vio-tag{
+  font-size:13px;padding:4px 10px;border-radius:99px;border:1px solid rgba(228,201,126,.5);
+  color:var(--kapok);background:rgba(228,201,126,.07);
+}
+.vio-none{font-size:14px;color:var(--paper-faint);font-style:italic}
+.crisis{
+  margin-top:10px;padding:8px 12px;border-radius:8px;font-weight:700;
+  background:rgba(224,83,47,.15);border:1px solid rgba(224,83,47,.6);color:var(--achiote-soft);
+  animation:pulse-crisis 1.6s ease-in-out infinite;
+}
+@keyframes pulse-crisis{50%{background:rgba(224,83,47,.28)}}
+@media (prefers-reduced-motion: reduce){
+  *{transition:none!important;animation:none!important}
+}
+
+/* ---------- сцена ---------- */
+main .scene{
+  background:var(--forest);border:1px solid var(--forest-line);border-radius:14px;
+  padding:30px 32px 28px;margin-top:8px;animation:scene-in .45s ease both;
+}
+@keyframes scene-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.eyebrow{
+  font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--kapok);
+  display:flex;gap:12px;align-items:center;margin-bottom:10px;flex-wrap:wrap;
+}
+.eyebrow .stage{color:var(--paper-faint);letter-spacing:.1em}
+.scene h2{font-family:var(--serif);font-weight:800;font-size:32px;line-height:1.15;margin-bottom:16px}
+.scene p{margin-bottom:14px;color:var(--paper)}
+.scene p.dim{color:var(--paper-dim)}
+.recognize{
+  border-left:3px solid var(--river);padding:10px 16px;margin:18px 0;
+  background:rgba(95,168,160,.08);border-radius:0 10px 10px 0;color:var(--river-soft);font-size:16px;
+}
+.recognize b{color:var(--paper);display:block;font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:4px}
+.drift-note{
+  display:flex;align-items:center;gap:10px;margin:16px 0;padding:10px 14px;border-radius:10px;
+  background:rgba(224,83,47,.09);border:1px dashed rgba(224,83,47,.45);color:var(--achiote-soft);font-size:15px;
+}
+.drift-note b{font-family:var(--serif);font-size:19px}
+
+.choices{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+.choices h3{font-family:var(--serif);font-size:20px;font-weight:700;margin-bottom:2px}
+.choice{
+  text-align:left;font-family:var(--sans);font-size:17px;color:var(--paper);cursor:pointer;
+  background:var(--forest-panel);border:1px solid var(--forest-line);border-radius:12px;
+  padding:14px 16px;transition:border-color .15s, transform .12s, background .15s;
+  display:flex;gap:14px;align-items:flex-start;width:100%;
+}
+.choice:hover{transform:translateX(4px)}
+.choice:focus-visible{outline:2px solid var(--kapok);outline-offset:2px}
+.choice .cbadge{
+  flex:none;font-family:var(--serif);font-weight:800;font-size:16px;width:34px;height:34px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;margin-top:2px;
+}
+.choice .ctext .clabel{font-weight:500;line-height:1.4}
+.choice .ctext .csub{font-size:13.5px;color:var(--paper-faint);margin-top:4px}
+.choice .cdp{margin-left:auto;flex:none;font-family:var(--serif);font-weight:800;font-size:17px;align-self:center;min-width:44px;text-align:right}
+
+.choice.company:hover{border-color:var(--achiote)}
+.choice.company .cbadge{background:rgba(224,83,47,.16);color:var(--achiote-soft);border:1px solid rgba(224,83,47,.4)}
+.choice.company .cdp.up{color:var(--achiote-soft)}
+.choice.company .cdp.down{color:var(--river-soft)}
+.choice.community:hover{border-color:var(--river)}
+.choice.community .cbadge{background:rgba(95,168,160,.14);color:var(--river-soft);border:1px solid rgba(95,168,160,.4)}
+.choice.community .cdp{color:var(--river-soft)}
+.choice.disabled{opacity:.38;cursor:not-allowed}
+.choice.disabled:hover{transform:none;border-color:var(--forest-line)}
+
+.actor-tag{font-size:12px;letter-spacing:.18em;text-transform:uppercase;padding:3px 10px;border-radius:99px;font-weight:700}
+.actor-tag.company{background:rgba(224,83,47,.15);color:var(--achiote-soft);border:1px solid rgba(224,83,47,.4)}
+.actor-tag.community{background:rgba(95,168,160,.14);color:var(--river-soft);border:1px solid rgba(95,168,160,.4)}
+
+.effects{display:flex;flex-direction:column;gap:8px;margin:18px 0}
+.eff{display:flex;gap:10px;align-items:baseline;font-size:16px}
+.eff .esign{font-family:var(--serif);font-weight:800;flex:none;width:52px;text-align:right}
+.eff.up .esign{color:var(--achiote-soft)}
+.eff.down .esign{color:var(--river-soft)}
+.eff.vio-open .esign{color:var(--kapok)}
+.eff.vio-close .esign{color:#8FCB9B}
+.eff .edesc{color:var(--paper-dim)}
+
+.lesson{
+  border-left:3px solid var(--kapok);padding:10px 16px;margin:16px 0;
+  background:rgba(228,201,126,.06);border-radius:0 10px 10px 0;color:var(--paper-dim);font-size:16px;
+}
+.lesson b{color:var(--kapok);display:block;font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:4px}
+
+.nav-btns{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+.btn{
+  font-family:var(--sans);font-size:16px;font-weight:700;cursor:pointer;border-radius:11px;
+  padding:12px 22px;border:1px solid var(--forest-line);background:var(--forest-panel);color:var(--paper);
+  transition:transform .12s, border-color .15s;
+}
+.btn:hover{transform:translateY(-1px);border-color:var(--river)}
+.btn:focus-visible{outline:2px solid var(--kapok);outline-offset:2px}
+.btn.primary{background:var(--river);border-color:var(--river);color:#0C231D}
+.btn.primary:hover{border-color:var(--river-soft);background:var(--river-soft)}
+.btn.ghost{background:transparent;color:var(--paper-dim);font-weight:500}
+.btn.danger{border-color:rgba(224,83,47,.5);color:var(--achiote-soft)}
+
+.debrief-q{
+  margin-top:22px;padding:16px 18px;border-radius:12px;background:var(--forest-panel);
+  border:1px solid var(--forest-line);
+}
+.debrief-q b{display:block;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper-dim);margin-bottom:8px}
+.debrief-q p{font-family:var(--serif);font-size:19px;font-style:italic;color:var(--paper);margin:0}
+
+/* ---------- финал ---------- */
+.verdict{
+  font-family:var(--serif);font-size:24px;font-weight:800;line-height:1.3;
+  padding:18px 20px;border-radius:12px;margin:18px 0;
+}
+.verdict.win{background:rgba(63,122,76,.2);border:1px solid var(--safe-zone);color:#B9E4C0}
+.verdict.loss{background:rgba(126,42,22,.25);border:1px solid var(--achiote);color:var(--achiote-soft)}
+.verdict.mid{background:rgba(228,201,126,.08);border:1px solid rgba(228,201,126,.5);color:var(--kapok)}
+.final-list{list-style:none;margin:12px 0}
+.final-list li{padding:6px 0;border-bottom:1px dashed var(--forest-line);display:flex;justify-content:space-between;gap:16px}
+.final-list li:last-child{border:none}
+ol.debrief{margin:12px 0 4px 22px}
+ol.debrief li{margin-bottom:8px;font-size:17px}
+.epilogue{
+  margin-top:22px;padding:18px 20px;border-radius:12px;border:1px solid rgba(228,201,126,.4);
+  background:rgba(228,201,126,.05);
+}
+.epilogue b{display:block;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--kapok);margin-bottom:8px}
+.epilogue p{font-family:var(--serif);font-size:18px;line-height:1.6}
+
+/* ---------- журнал ---------- */
+.log-wrap{margin-top:18px}
+.log-toggle{width:100%;text-align:left}
+.log{
+  margin-top:10px;background:var(--forest);border:1px solid var(--forest-line);border-radius:12px;
+  padding:14px 18px;max-height:320px;overflow-y:auto;font-size:15px;
+}
+.log .lrow{display:flex;gap:12px;padding:6px 0;border-bottom:1px dashed var(--forest-line)}
+.log .lrow:last-child{border:none}
+.log .lround{flex:none;width:26px;font-family:var(--serif);font-weight:800;color:var(--paper-faint)}
+.log .lwho{flex:none;width:86px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding-top:2px}
+.log .lwho.company{color:var(--achiote-soft)}
+.log .lwho.community{color:var(--river-soft)}
+.log .lwho.system{color:var(--paper-faint)}
+.log .ltext{color:var(--paper-dim)}
+.log .ldp{margin-left:auto;flex:none;font-family:var(--serif);font-weight:800}
+.log .ldp.up{color:var(--achiote-soft)}
+.log .ldp.down{color:var(--river-soft)}
+
+/* ---------- панель фасилитатора ---------- */
+.fac-fab{
+  position:fixed;right:18px;bottom:18px;z-index:80;width:46px;height:46px;border-radius:50%;
+  background:var(--forest-panel);border:1px solid var(--forest-line);color:var(--paper-dim);
+  font-size:20px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.4);
+}
+.fac-fab:hover{color:var(--kapok);border-color:var(--kapok)}
+.fac{
+  position:fixed;right:18px;bottom:74px;z-index:80;width:320px;max-height:74vh;overflow-y:auto;
+  background:#12281B;border:1px solid var(--kapok);border-radius:14px;padding:16px;display:none;
+  box-shadow:0 12px 40px rgba(0,0,0,.55);font-size:14px;
+}
+.fac.open{display:block}
+.fac h4{font-family:var(--serif);font-size:17px;color:var(--kapok);margin-bottom:10px}
+.fac .fsec{margin-bottom:14px;padding-bottom:12px;border-bottom:1px dashed var(--forest-line)}
+.fac .fsec:last-child{border:none;margin-bottom:0;padding-bottom:0}
+.fac .flabel{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--paper-faint);margin-bottom:6px}
+.fac .frow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.fac .fbtn{
+  font-size:13px;padding:4px 10px;border-radius:7px;cursor:pointer;
+  background:var(--forest-panel);border:1px solid var(--forest-line);color:var(--paper);
+}
+.fac .fbtn:hover{border-color:var(--kapok)}
+.fac .fname{flex:1;color:var(--paper-dim)}
+.fac .vtoggle{display:flex;align-items:center;gap:8px;padding:3px 0;cursor:pointer;color:var(--paper-dim)}
+.fac .vtoggle input{accent-color:var(--kapok)}
+
+footer{margin-top:40px;font-size:13px;color:var(--paper-faint);text-align:center;line-height:1.6}
+
+@media (max-width:640px){
+  body{font-size:16px}
+  .dash{position:static;padding-bottom:10px}
+  main .scene{padding:20px 18px}
+  .scene h2{font-size:25px}
+  .masthead .case{display:none}
+  .choice .cdp{display:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="masthead">
+    <svg width="54" height="54" viewBox="0 0 54 54" aria-hidden="true">
+      <!-- солнце зенита + река: Сараяку — «народ полудня» на реке Бобонаса -->
+      <circle cx="27" cy="20" r="9" fill="none" stroke="#E4C97E" stroke-width="2.4"/>
+      <g stroke="#E4C97E" stroke-width="2.2" stroke-linecap="round">
+        <line x1="27" y1="4" x2="27" y2="8"/><line x1="41" y1="20" x2="45" y2="20"/>
+        <line x1="9" y1="20" x2="13" y2="20"/><line x1="37" y1="10" x2="40" y2="7"/>
+        <line x1="14" y1="7" x2="17" y2="10"/>
+      </g>
+      <path d="M6 38 Q14 33 22 38 T38 38 T54 38" fill="none" stroke="#5FA8A0" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M2 46 Q10 41 18 46 T34 46 T50 46" fill="none" stroke="#5FA8A0" stroke-width="2.6" stroke-linecap="round" opacity=".55"/>
+    </svg>
+    <h1><small>Переговорная игра · СПОС / FPIC</small>TAMAANI: Кейс Сараяку</h1>
+    <div class="case">По материалам дела<br><i>Kichwa Sarayaku v. Ecuador</i>,<br>Межамериканский суд, 2012</div>
+  </header>
+
+  <div class="dash" id="dash"></div>
+  <main id="main"></main>
+
+  <div class="log-wrap">
+    <button class="btn ghost log-toggle" id="logToggle" aria-expanded="false">▸ Журнал партии (для дебрифа)</button>
+    <div class="log" id="log" hidden></div>
+  </div>
+
+  <footer>Онлайн-версия для игры с фасилитатором · шкала проекта 0–50 · нажмите ⚙ для панели фасилитатора</footer>
+</div>
+
+<button class="fac-fab" id="facFab" title="Панель фасилитатора" aria-label="Панель фасилитатора">⚙</button>
+<div class="fac" id="fac" role="dialog" aria-label="Панель фасилитатора"></div>
+
+<script>
+/* ============================================================
+   TAMAANI: Кейс Сараяку — данные игры
+   Реальные ситуации по мотивам дела Kichwa Sarayaku v. Ecuador
+   (Межамериканский суд по правам человека, 27.06.2012)
+   и матрицы переговорных ловушек Tamaani Matrix (T01–T08)
+   ============================================================ */
+
+const VIOLATIONS = {
+  decision_before: {
+    label: "Решение принято до консультаций",
+    principle: "Предварительность (Prior)",
+  },
+  postponed: {
+    label: "Консультации отложены — проект идёт",
+    principle: "Предварительность (Prior)",
+  },
+  benefits: {
+    label: "Выгоды вместо согласия",
+    principle: "Свобода решения (Free)",
+  },
+  bad_rep: {
+    label: "Сомнительное представительство",
+    principle: "Легитимное представительство",
+  },
+  fake_community: {
+    label: "Подмена общины",
+    principle: "Легитимное представительство",
+  },
+  formal_info: {
+    label: "Формальная информация вместо понимания",
+    principle: "Информированность (Informed)",
+  },
+  access: {
+    label: "Доступ к территории без согласия",
+    principle: "Предварительность (Prior)",
+  },
+  danger: {
+    label: "Опасность на территории",
+    principle: "Добросовестность (Good Faith)",
+  },
+};
+
+const RESOURCES = {
+  law:     { label: "Право",     hint: "суды, жалобы, юридическое оспаривание" },
+  info:    { label: "Информация", hint: "документы, экспертиза, перевод, фиксация фактов" },
+  allies:  { label: "Союзники",  hint: "НПО, медиа, наблюдатели, внешняя поддержка" },
+  support: { label: "Община",    hint: "собрания, мандат, протест, мобилизация" },
+};
+
+/* Механика:
+   Шкала проекта 0–50. Старт 30. ≤10 — откат, ≥50 — точка невозврата.
+   Инерция в начале раунда: +2 базово, +1 за каждое открытое нарушение.
+   dp = изменение шкалы; cost = {ресурс: сколько};
+   closes = [нарушения, которые закрываются]; opens = [которые открываются].
+*/
+
+const STORIES = [
+  /* ---------------- ИСТОРИЯ 1 · T01 / T02 ---------------- */
+  {
+    id: 1,
+    trap: "T01 · «Решение уже принято»",
+    title: "Концессия выдана без консультаций",
+    stage: "До консультаций",
+    intro: `26 июля 1996 года Эквадор подписал контракт с аргентинской компанией CGC
+      на разведку и добычу нефти в «Блоке 23». Около 65% блока — родовая территория
+      народа кичва Сараяку. Община узнаёт об этом постфактум: ключевое решение
+      о её земле принято без неё.`,
+    recognize: "Переговоры начались слишком поздно. Компания будет представлять проект как необратимый — задача общины вернуть разговор к законности самой процедуры.",
+    companyMoves: [
+      {
+        key: "A", dp: +6, opens: ["decision_before"],
+        label: "«Контракт подписан, концессия законна — проект идёт дальше»",
+        result: `Компания ссылается на подписанный контракт с государством и продолжает
+          подготовку. Вопрос о том, что общину никто не спросил, объявляется «внутренним
+          делом Эквадора».`,
+        lesson: "Классика T01: свершившийся факт вместо согласия. Чем дольше это не оспорено, тем «нормальнее» выглядит.",
+      },
+      {
+        key: "B", dp: +5, opens: ["postponed"],
+        label: "«Мы обязательно проведём консультации — на следующем этапе»",
+        result: `Компания обещает «социализацию проекта» позже, когда будет готова
+          техническая документация. А пока — мобилизует подрядчиков и оформляет
+          разрешения. Проект движется быстрее, чем разговор о нём.`,
+        lesson: "T02: «поговорим потом» — способ пройти точку невозврата до начала переговоров.",
+      },
+      {
+        key: "C", dp: -4, opens: [],
+        label: "Приостановить подготовку и начать консультации до любых работ",
+        result: `Компания замораживает подготовительные работы. Но факт остаётся:
+          концессия уже выдана без предварительной консультации — это нарушение
+          не исчезает от паузы, его нужно оспорить.`,
+        lesson: "Даже добросовестная пауза не отменяет дефект процедуры на старте.",
+      },
+    ],
+    communityActions: [
+      {
+        key: "court", dp: -8, cost: { law: 1 }, closes: ["decision_before", "postponed"],
+        label: "Оспорить концессию юридически",
+        sub: "1 Право · проект −8 · закрывает нарушения процедуры",
+        result: `Община подаёт жалобу: концессия на родовой территории выдана без
+          консультации, что нарушает Конвенцию МОТ №169 и конституцию. Логика
+          «сначала проект — потом разговор» юридически остановлена.`,
+      },
+      {
+        key: "docs", dp: -4, cost: { info: 1 }, closes: ["postponed"],
+        label: "Запросить контракт и документы по Блоку 23",
+        sub: "1 Информация · проект −4 · закрывает «консультации отложены»",
+        result: `Община официально требует текст контракта, карты блока и график работ.
+          Отговорка «объясним позже» больше не работает. Но сама концессия,
+          выданная без консультаций, этим не отменяется.`,
+      },
+      {
+        key: "assembly", dp: -2, cost: { support: 1 }, closes: [],
+        label: "Созвать общее собрание и принять единую позицию",
+        sub: "1 Община · проект −2 · укрепляет мандат на будущее",
+        result: `Собрание Сараяку принимает решение: без согласия общины — никаких работ.
+          Внутренняя позиция укреплена, у лидеров ясный мандат. Но нарушение
+          «решение до консультаций» остаётся открытым — его закроет только
+          юридическое или процедурное действие.`,
+      },
+      {
+        key: "nothing", dp: 0, cost: {}, closes: [],
+        label: "Пока не отвечать",
+        sub: "Ресурсы сохранены · нарушения остаются и работают на компанию",
+        result: `Община выжидает. Ресурсы целы, но каждое открытое нарушение
+          ускоряет проект в следующем раунде.`,
+      },
+    ],
+    debrief: "Что произошло после первого решения: община вернула контроль над процессом — или проект всё равно движется быстрее, чем разговор о согласии?",
+  },
+
+  /* ---------------- ИСТОРИЯ 2 · T03 / T04 ---------------- */
+  {
+    id: 2,
+    trap: "T03 · «Сначала поговорим о выгодах»",
+    title: "Компания приходит в общину",
+    stage: "Начало консультаций",
+    intro: `Представители CGC приезжают в общины на реке Бобонаса. Они привозят
+      предложения: рабочие места, медицинская помощь, лодочные моторы, деньги
+      «на развитие». Отдельным жителям предлагают персональные выплаты
+      за подпись под «актом поддержки». О самом согласии на нефтяной проект
+      речь аккуратно не заходит.`,
+    recognize: "Выгоды подменяют согласие. Задача общины — разделить два разных разговора: о компенсациях и о СПОС. И проверить, с кем именно компания «договаривается».",
+    companyMoves: [
+      {
+        key: "A", dp: +5, opens: ["benefits"],
+        label: "Обещать рабочие места, медпомощь и деньги на развитие",
+        result: `Компания раздаёт обещания и мелкие блага: обследования врачей,
+          стройматериалы, обещание нанять местных. Разговор о согласии растворяется
+          в разговоре о подарках.`,
+        lesson: "T03: если сначала обсудили выгоды — согласие уже «как будто подразумевается».",
+      },
+      {
+        key: "B", dp: +7, opens: ["bad_rep"],
+        label: "Договариваться с отдельными удобными лидерами",
+        result: `Компания находит нескольких человек, готовых подписать соглашение,
+          и объявляет: «лидеры общины поддерживают проект». Общее собрание Сараяку
+          решения не принимало.`,
+        lesson: "T04: компания сама выбирает, кто «представляет» общину. Согласие удобных ≠ согласие общины.",
+      },
+      {
+        key: "C", dp: 0, opens: [],
+        label: "Передать документы и дать время на обсуждение",
+        result: `Компания передаёт материалы проекта и не торопит с ответом.
+          Проект в этом раунде не продвинулся. Но открытые ранее нарушения
+          никуда не делись.`,
+        lesson: "Корректный ход не отменяет прошлых дефектов процедуры.",
+      },
+    ],
+    communityActions: [
+      {
+        key: "separate", dp: -5, cost: { support: 1 }, closes: ["benefits"],
+        label: "Собрание: отделить выгоды от согласия",
+        sub: "1 Община · проект −5 · закрывает «выгоды вместо согласия»",
+        result: `Собрание фиксирует: рабочие места, моторы и медпомощь могут обсуждаться —
+          но отдельно и только после решения о согласии. Подарки не считаются ответом
+          на вопрос, который общине не задали.`,
+      },
+      {
+        key: "mandate", dp: -5, cost: { support: 1 }, closes: ["bad_rep"],
+        label: "Проверить мандат «подписавших» и отозвать полномочия",
+        sub: "1 Община · проект −5 · закрывает «сомнительное представительство»",
+        result: `Община публично проверяет: имели ли подписавшие право говорить от имени
+          Сараяку. Собрание подтверждает — не имели. Компании официально сообщают,
+          с кем и в каком порядке ведутся переговоры.`,
+      },
+      {
+        key: "court", dp: -8, cost: { law: 1 }, closes: ["bad_rep"],
+        label: "Оспорить «соглашения» с отдельными лицами юридически",
+        sub: "1 Право · проект −8 · закрывает «сомнительное представительство»",
+        result: `Юристы общины оспаривают силу индивидуальных подписей: решение
+          о родовой территории принимает только община в своей процедуре.
+          «Соглашения» теряют вес как доказательство поддержки.`,
+      },
+      {
+        key: "media", dp: -4, cost: { allies: 1 }, closes: [],
+        label: "Вынести историю к союзникам и в медиа",
+        sub: "1 Союзники · проект −4 · давление, но нарушения сами не закрываются",
+        result: `НПО и журналисты рассказывают, как «поддержка общины» собирается
+          по одной подписи за мотор. Компании становится дороже действовать так же.
+          Но внутренние вопросы мандата этим не решены.`,
+      },
+      {
+        key: "nothing", dp: 0, cost: {}, closes: [],
+        label: "Пока не отвечать",
+        sub: "Ресурсы сохранены · нарушения остаются и работают на компанию",
+        result: `Община выжидает. Каждое открытое нарушение ускоряет проект
+          в следующем раунде.`,
+      },
+    ],
+    debrief: "Помогли ли обещания компании общине принять решение — или начали подменять само согласие ситуативными выгодами?",
+  },
+
+  /* ---------------- ИСТОРИЯ 3 · T05 / T09 ---------------- */
+  {
+    id: 3,
+    trap: "T05 · «Вот документы»",
+    title: "Документы есть — понимания нет",
+    stage: "Консультации",
+    intro: `Компания передаёт оценку воздействия на окружающую среду: сотни страниц
+      технического текста на испанском, без перевода на кичва и без объяснения,
+      что проект изменит для реки, леса, охоты, троп и жизни общины.
+      Через две недели назначен «следующий этап консультаций».`,
+    recognize: "Передача документов ≠ информирование. Компания формально «выполнила обязанность» и захватывает темп. Задача — добиться реального понимания и вернуть контроль над регламентом.",
+    companyMoves: [
+      {
+        key: "A", dp: +5, opens: ["formal_info"],
+        label: "«Информация предоставлена, община могла ознакомиться»",
+        result: `Компания фиксирует в протоколе: документы переданы. То, что их
+          невозможно прочитать без инженерного образования и переводчика, —
+          «не проблема компании».`,
+        lesson: "T05: документы вместо понимания. Формальность процедуры маскирует пустоту содержания.",
+      },
+      {
+        key: "B", dp: +7, opens: ["postponed", "formal_info"],
+        label: "«Сроки идут» — назначить следующий этап, не дожидаясь понимания",
+        result: `Компания давит темпом: «у вас была возможность изучить материалы,
+          график согласован с министерством». Проект ускоряется, пока община
+          разбирается в терминах сейсморазведки.`,
+        lesson: "T09: «времени почти не осталось» — дефицит времени создаётся искусственно и сам становится инструментом давления.",
+      },
+      {
+        key: "C", dp: -4, opens: [], closesByCompany: ["formal_info", "postponed"],
+        label: "Оплатить перевод, независимое разъяснение рисков и дать время",
+        result: `Компания финансирует перевод на кичва и независимого специалиста,
+          который объясняет риски простым языком. Сроки сдвигаются.
+          Информационные нарушения этого раунда сняты.`,
+        lesson: "Так выглядит добросовестное информирование: понятно, независимо, без дедлайна-ловушки.",
+      },
+    ],
+    communityActions: [
+      {
+        key: "translate", dp: -4, cost: { info: 1 }, closes: ["formal_info"],
+        label: "Потребовать перевод и разъяснение простым языком",
+        sub: "1 Информация · проект −4 · закрывает «формальную информацию»",
+        result: `Община официально заявляет: консультация не состоялась, пока материалы
+          не переведены и не объяснены. Протокол «документы переданы» оспорен.`,
+      },
+      {
+        key: "expert", dp: -10, cost: { info: 2 }, closes: ["formal_info", "postponed"],
+        label: "Заказать независимую экспертизу проекта",
+        sub: "2 Информация · проект −10 · закрывает оба информационных нарушения",
+        result: `Независимые эксперты разбирают оценку воздействия и находят,
+          о чём документ умалчивает: маршруты сейсмолиний через охотничьи угодья,
+          риски для воды. Теперь у общины есть собственная картина проекта —
+          и очень весомый аргумент.`,
+      },
+      {
+        key: "allies", dp: -4, cost: { allies: 1 }, closes: [],
+        label: "Подключить НПО-специалистов",
+        sub: "1 Союзники · проект −4 · помощь есть, нарушение остаётся открытым",
+        result: `Дружественные организации помогают читать документы. Это замедляет
+          компанию, но формально консультация всё ещё «идёт по графику» —
+          нарушение нужно закрывать процедурно.`,
+      },
+      {
+        key: "court", dp: -5, cost: { law: 1 }, closes: ["postponed"],
+        label: "Оспорить график консультаций юридически",
+        sub: "1 Право · проект −5 · закрывает «консультации отложены/ускорены»",
+        result: `Юристы добиваются: этапы консультации не могут назначаться раньше,
+          чем община реально поняла материалы. Темп перестаёт диктовать компания.`,
+      },
+      {
+        key: "nothing", dp: 0, cost: {}, closes: [],
+        label: "Пока не отвечать",
+        sub: "Ресурсы сохранены · нарушения остаются и работают на компанию",
+        result: `Община выжидает. Каждое открытое нарушение ускоряет проект
+          в следующем раунде.`,
+      },
+    ],
+    debrief: "Была ли у общины реальная информация для решения — или только стопка бумаги, изображающая информирование?",
+  },
+
+  /* ---------------- ИСТОРИЯ 4 · T04+ «подмена общины» ---------------- */
+  {
+    id: 4,
+    trap: "T04 · «Мы знаем, кто представляет вашу общину»",
+    title: "Спор о представителях",
+    stage: "Консультации",
+    intro: `Компания заявляет государству: «часть лидеров и соседние общины проект
+      поддерживают». В ход идут протоколы встреч, подписи, соглашения
+      с отдельными людьми и с общинами вокруг Сараяку. Внутри общины — спор:
+      кто вообще имел мандат говорить от имени народа?`,
+    recognize: "Компания пытается сама назначить, чьё «да» считается согласием. Задача — восстановить легитимную процедуру представительства и не дать спорному протоколу стать «фактом».",
+    companyMoves: [
+      {
+        key: "A", dp: +5, opens: ["bad_rep"],
+        label: "Закрытые встречи с отдельными лидерами — и заявление о поддержке",
+        result: `После непубличных встреч компания объявляет: «лидеры поддерживают
+          проект». Кто, на каких условиях, с каким мандатом — не уточняется.`,
+        lesson: "Непрозрачность встреч — сама по себе признак ловушки представительства.",
+      },
+      {
+        key: "B", dp: +8, opens: ["fake_community"],
+        label: "Передать государству «протокол поддержки» от части людей",
+        result: `Документ с подписями части жителей уходит в министерство как
+          «доказательство согласия общины». Общее решение Сараяку не принято,
+          но на бумаге согласие уже «есть».`,
+        lesson: "Подмена общины: спорный документ начинает жить своей жизнью в госорганах. Его нужно оспаривать адресно — там, куда он подан.",
+      },
+      {
+        key: "C", dp: -4, opens: [],
+        label: "Дождаться решения общего собрания общины",
+        result: `Компания признаёт: отдельные встречи и письма не заменяют мандат
+          всей общины. Проект откатывается. Ранее открытые нарушения при этом
+          остаются открытыми.`,
+        lesson: "Единственный корректный адресат вопроса о согласии — процедура самой общины.",
+      },
+    ],
+    communityActions: [
+      {
+        key: "assembly", dp: -5, cost: { support: 1 }, closes: ["bad_rep"],
+        label: "Общее собрание: подтвердить, у кого мандат",
+        sub: "1 Община · проект −5 · закрывает «сомнительное представительство»",
+        result: `Собрание Сараяку публично подтверждает: от имени народа говорит
+          только уполномоченный совет по решению собрания. Отдельные лидеры
+          не могут заменить это решение. Если «протокол поддержки» уже ушёл
+          государству — его придётся оспаривать отдельно.`,
+      },
+      {
+        key: "court", dp: -8, cost: { law: 1 }, closes: ["bad_rep", "fake_community"],
+        label: "Оспорить представительство и «протокол» юридически",
+        sub: "1 Право · проект −8 · закрывает оба нарушения представительства",
+        result: `Община оспаривает и полномочия «удобных лидеров», и юридическую силу
+          протокола, поданного государству. Спорные бумаги перестают считаться
+          доказательством согласия.`,
+      },
+      {
+        key: "protest", dp: -8, cost: { support: 1 }, closes: ["bad_rep"],
+        label: "Коллективный протест: «переговоры без мандата — не с нами»",
+        sub: "1 Община · проект −8 · «подмена общины» остаётся, если протокол уже подан",
+        result: `Община публично отказывается признавать переговоры без мандата.
+          Это резко сбивает темп проекта. Но если спорный протокол уже лежит
+          в министерстве, протест сам по себе его оттуда не убирает.`,
+      },
+      {
+        key: "allies", dp: -4, cost: { allies: 1 }, closes: ["fake_community"],
+        label: "Публично разобрать «подмену общины» с союзниками",
+        sub: "1 Союзники · проект −4 · закрывает «подмену общины»",
+        result: `НПО и медиа документируют, как собирались подписи и кто именно
+          «поддержал» проект. Публичный разбор лишает протокол убедительности
+          для государства и инвесторов.`,
+      },
+      {
+        key: "nothing", dp: 0, cost: {}, closes: [],
+        label: "Пока не отвечать",
+        sub: "Ресурсы сохранены · нарушения остаются и работают на компанию",
+        result: `Община выжидает. Каждое открытое нарушение ускоряет проект
+          в следующем раунде.`,
+      },
+    ],
+    debrief: "Кто имел право говорить от имени общины? Можно ли считать согласие настоящим, если компания сама выбирает, чьё «да» ей слушать?",
+  },
+
+  /* ---------------- ИСТОРИЯ 5 · T07 ---------------- */
+  {
+    id: 5,
+    trap: "T07 · «Мы уже начали работы»",
+    title: "Работы приближаются к территории",
+    stage: "До согласия",
+    intro: `Конец 2002 года. CGC начинает сейсморазведку. На территории Сараяку
+      появляются просеки, вертолётные площадки, бригады рабочих в сопровождении
+      охраны. Компания называет это «предварительными действиями» — ещё не добыча.
+      Каждый день работ делает проект чуть более «свершившимся фактом».`,
+    recognize: "Каждый день работ снижает переговорную позицию общины. Нельзя признать «свершившиеся факты» новой нормой — счёт идёт на недели.",
+    companyMoves: [
+      {
+        key: "A", dp: +6, opens: ["access"],
+        label: "Отправить бригады на территорию: «это ещё не добыча»",
+        result: `Рабочие и техника заходят на землю Сараяку без решения общины.
+          Формула «это только разведка» превращает вторжение в рутину.`,
+        lesson: "T07/T10: «это всего лишь разведка» — вход на территорию сам по себе и есть проект.",
+      },
+      {
+        key: "B", dp: +8, opens: ["access"],
+        label: "Попросить государство «обеспечить доступ» силой",
+        result: `На реке Бобонаса появляются военные посты. Вопрос согласия общины
+          подменяется вопросом прохода и государственной силы. Люди Сараяку
+          сталкиваются с ограничением передвижения по собственной реке.`,
+        lesson: "Когда аргументом становится сила государства, переговоры о согласии фактически подменены принуждением.",
+      },
+      {
+        key: "C", dp: -4, opens: [],
+        label: "Приостановить работы на территории до решения общины",
+        result: `Компания отводит бригады. Проект откатывается, но давление
+          предыдущих раундов и открытые нарушения никуда не исчезают.`,
+        lesson: "Пауза в работах — необходимое, но не достаточное условие восстановления процесса.",
+      },
+    ],
+    communityActions: [
+      {
+        key: "court", dp: -8, cost: { law: 1 }, closes: ["access"],
+        label: "Добиться запрета работ (обеспечительные меры)",
+        sub: "1 Право · проект −8 · закрывает «доступ без согласия»",
+        result: `Община добивается обеспечительных мер: работы на территории
+          остановлены, доступ без согласия признан недопустимым. В реальном деле
+          Межамериканская комиссия предписала такие меры Эквадору в 2003 году.`,
+      },
+      {
+        key: "refuse", dp: -8, cost: { support: 1 }, closes: ["access"],
+        label: "«Мирные лагеря»: коллективный отказ пропустить работы",
+        sub: "1 Община · проект −8 · закрывает «доступ без согласия»",
+        result: `Сараяку объявляет «чрезвычайное положение общины»: смены дежурных
+          выходят на тропы и не допускают продолжения работ. Жизнь общины
+          на месяцы подчинена защите территории — это цена такого ответа.`,
+      },
+      {
+        key: "observers", dp: -4, cost: { allies: 1 }, closes: [],
+        label: "Позвать наблюдателей и прессу на территорию",
+        sub: "1 Союзники · проект −4 · давление видно, но доступ не остановлен",
+        result: `Наблюдатели и журналисты фиксируют происходящее. Компании и государству
+          становится труднее действовать тихо. Но пока доступ не остановлен юридически
+          или коллективным решением — нарушение открыто.`,
+      },
+      {
+        key: "nothing", dp: 0, cost: {}, closes: [],
+        label: "Пока не отвечать",
+        sub: "Ресурсы сохранены · нарушения остаются и работают на компанию",
+        result: `Община выжидает. На этой стадии бездействие особенно дорого:
+          работы на земле создают необратимость быстрее любых бумаг.`,
+      },
+    ],
+    debrief: "Можно ли считать согласие свободным, если техника уже на территории? Что «предварительные действия» делают с переговорной позицией общины?",
+  },
+
+  /* ---------------- ИСТОРИЯ 6 · T08 ---------------- */
+  {
+    id: 6,
+    trap: "T08 · «Всё под контролем»",
+    title: "Взрывчатка на территории",
+    stage: "Во время проекта",
+    intro: `Община узнаёт: для сейсморазведки CGC заложила на территории Сараяку
+      около 1400 килограммов взрывчатки — пентолита, — частично закопанной
+      в землю на глубину до 12 метров. Тропы, охотничьи угодья и места сбора
+      стали опасными. Компания говорит, что «риск контролируется».`,
+    recognize: "Незначительные (по словам компании) нарушения становятся нормой. Если территория опасна — согласие уже не может быть свободным: люди реагируют на созданный риск, а не решают о будущем.",
+    companyMoves: [
+      {
+        key: "A", dp: +8, opens: ["danger", "access"],
+        label: "Продолжить работы: «риск контролируется»",
+        result: `Компания продолжает работы рядом с заложенной взрывчаткой.
+          Для общины территория перестала быть безопасной — по тропам ходят
+          с оглядкой, детей не пускают в лес.`,
+        lesson: "T08: минимизация инцидента. «Контролируемый риск» на чужой земле — это риск, о котором не спросили.",
+      },
+      {
+        key: "B", dp: +5, opens: ["danger", "formal_info"],
+        label: "Отрицать опасность и не пускать независимую проверку",
+        result: `Компания заявляет, что община «преувеличивает», но независимую
+          проверку не допускает и понятного подтверждения безопасности не даёт.`,
+        lesson: "Отказ от независимой проверки — сам по себе информация: проверять есть что.",
+      },
+      {
+        key: "C", dp: -6, opens: [], closesByCompany: ["danger", "access"],
+        label: "Остановить работы и удалить взрывчатку под наблюдением общины",
+        result: `Компания останавливает работы и соглашается на изъятие опасных
+          материалов под наблюдением общины и независимых специалистов.
+          Нарушения опасности и доступа этого раунда сняты.`,
+        lesson: "Реальная деэскалация: устранить созданный риск, а не переубеждать пострадавших.",
+      },
+    ],
+    communityActions: [
+      {
+        key: "court", dp: -8, cost: { law: 1 }, closes: ["danger", "access"],
+        label: "Судебный запрет работ и требование обезвредить территорию",
+        sub: "1 Право · проект −8 · закрывает «опасность» и «доступ»",
+        result: `Община добивается запрета работ и обязательства обезвредить
+          территорию. В реальном деле именно взрывчатка стала одним из центральных
+          фактов в Межамериканском суде — Эквадор обязали её изъять.`,
+      },
+      {
+        key: "removal", dp: -6, cost: { allies: 1 }, closes: ["danger"],
+        label: "Требовать удаления взрывчатки под внешним наблюдением",
+        sub: "1 Союзники · проект −6 · закрывает «опасность на территории»",
+        result: `Под давлением наблюдателей начинается изъятие опасных материалов.
+          Но само по себе это не значит, что компания получила согласие на доступ —
+          если доступ был открыт как нарушение, он остаётся.`,
+      },
+      {
+        key: "block", dp: -8, cost: { support: 1 }, closes: ["access"],
+        label: "Коллективная блокировка доступа до устранения опасности",
+        sub: "1 Община · проект −8 · «опасность» остаётся, пока материалы в земле",
+        result: `Община перекрывает доступ к работам, пока территория не обезврежена.
+          Проект резко откатывается. Но взрывчатка всё ещё в земле — нарушение
+          «опасность на территории» открыто.`,
+      },
+      {
+        key: "fix", dp: -4, cost: { info: 1 }, closes: ["formal_info"],
+        label: "Зафиксировать опасные места, потребовать независимую проверку",
+        sub: "1 Информация · проект −4 · закрывает «формальную информацию»",
+        result: `Община картирует места закладки, собирает свидетельства и требует
+          независимой проверки. Заявление «риск контролируется» опровергнуто фактами.
+          Сама опасность при этом ещё не устранена.`,
+      },
+      {
+        key: "nothing", dp: 0, cost: {}, closes: [],
+        label: "Пока не отвечать",
+        sub: "Ресурсы сохранены · нарушения остаются и работают на компанию",
+        result: `Община выжидает — с взрывчаткой в земле это самый дорогой из всех
+          вариантов ожидания.`,
+      },
+    ],
+    debrief: "Можно ли вообще говорить о согласии, когда опасность уже создана? Кто и как должен доказывать безопасность — и почему не наоборот?",
+  },
+];
+
+const EPILOGUE = `В реальности народ кичва Сараяку прошёл этот путь до конца:
+дело дошло до Межамериканского суда по правам человека. 27 июня 2012 года суд
+признал Эквадор ответственным за нарушение права общины на предварительную
+консультацию, общинную собственность и культурную идентичность — и обязал
+провести настоящие консультации, изъять взрывчатку и компенсировать вред.
+Судьи впервые в истории суда сами приехали на территорию общины.`;
+
+
+/* ============================================================
+   ДВИЖОК
+   ============================================================ */
+const MAX = 50, START = 30, WIN_AT = 10, CRISIS_AT = 42;
+const DRIFT_BASE = 2, DRIFT_PER_VIOLATION = 1;
+
+let S = null;
+
+function newState(){
+  return {
+    project: START,
+    res: { law:3, info:3, allies:3, support:3 },
+    violations: new Set(["decision_before"]), // концессия уже выдана
+    storyIdx: 0,
+    phase: "start",           // start | story | companyResult | community | communityResult | summary | final
+    chosenCompany: null,
+    chosenAction: null,
+    lastDelta: 0,
+    driftApplied: 0,
+    finalReason: null,        // "win" | "loss" | "stop"
+    log: [],
+  };
+}
+
+function clampProject(){ S.project = Math.max(0, Math.min(MAX, S.project)); }
+
+function addLog(who, text, dp){
+  S.log.push({ round: S.storyIdx + 1, who, text, dp: dp||0 });
+  renderLog();
+}
+
+function applyDelta(dp){
+  S.lastDelta = dp;
+  S.project += dp;
+  clampProject();
+}
+
+function story(){ return STORIES[S.storyIdx]; }
+
+/* ---------- переходы ---------- */
+function startGame(){
+  S = newState();
+  addLog("system", "Старт партии. Концессия на Блок 23 выдана без консультаций — проект уже на 30/50.", 0);
+  S.phase = "start";
+  render();
+}
+
+function goStory(idx){
+  S.storyIdx = idx;
+  S.phase = "story";
+  S.chosenCompany = null; S.chosenAction = null;
+  // инерция проекта — начиная со 2-й истории
+  if (idx > 0){
+    const drift = DRIFT_BASE + DRIFT_PER_VIOLATION * S.violations.size;
+    S.driftApplied = drift;
+    applyDelta(drift);
+    addLog("system", `Инерция проекта: +${DRIFT_BASE} базово, +${DRIFT_PER_VIOLATION}×${S.violations.size} за открытые нарушения.`, drift);
+  } else {
+    S.driftApplied = 0; S.lastDelta = 0;
+  }
+  render();
+}
+
+function chooseCompany(move){
+  S.chosenCompany = move;
+  applyDelta(move.dp);
+  (move.opens||[]).forEach(v => S.violations.add(v));
+  (move.closesByCompany||[]).forEach(v => S.violations.delete(v));
+  addLog("company", `${story().trap.split("·")[0].trim()} — ход ${move.key}: ${move.label}`, move.dp);
+  S.phase = "companyResult";
+  render();
+}
+
+function chooseAction(act){
+  const affordable = Object.entries(act.cost||{}).every(([r,c]) => S.res[r] >= c);
+  if (!affordable) return;
+  S.chosenAction = act;
+  Object.entries(act.cost||{}).forEach(([r,c]) => S.res[r] -= c);
+  applyDelta(act.dp);
+  (act.closes||[]).forEach(v => S.violations.delete(v));
+  addLog("community", act.label, act.dp);
+  S.phase = "communityResult";
+  render();
+}
+
+function goSummary(){
+  if (S.project >= MAX){ return goFinal("loss"); }
+  if (S.project <= WIN_AT){ return goFinal("win"); }
+  S.phase = "summary";
+  render();
+}
+
+function goFinal(reason){
+  S.finalReason = reason;
+  S.phase = "final";
+  addLog("system", reason === "win" ? "Финал: проект откачен, процесс можно начать заново."
+        : reason === "loss" ? "Финал: точка невозврата — 50/50."
+        : "Финал: партия остановлена фасилитатором для дебрифа.", 0);
+  render();
+}
+
+function nextStory(){
+  if (S.storyIdx + 1 >= STORIES.length) return goFinal("stop");
+  goStory(S.storyIdx + 1);
+}
+
+/* ============================================================
+   РЕНДЕР
+   ============================================================ */
+const $dash = document.getElementById("dash");
+const $main = document.getElementById("main");
+const $log  = document.getElementById("log");
+
+const ICONS = {
+  law: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5FA8A0" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v18M5 21h14M12 6l-6 4h12l-6-4z"/><path d="M6 10l-2.5 5a3 3 0 0 0 5 0L6 10zM18 10l-2.5 5a3 3 0 0 0 5 0L18 10z"/></svg>`,
+  info: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5FA8A0" stroke-width="1.8" stroke-linecap="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7"/></svg>`,
+  allies: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5FA8A0" stroke-width="1.8" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M3 20c0-3 2.5-5 5-5s5 2 5 5M11 20c0-3 2.5-5 5-5s5 2 5 5"/></svg>`,
+  support: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5FA8A0" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/></svg>`,
+};
+
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+function renderDash(){
+  const pct = (S.project / MAX) * 100;
+  const vios = [...S.violations];
+  const deltaTxt = S.lastDelta > 0 ? `+${S.lastDelta}` : (S.lastDelta < 0 ? `${S.lastDelta}` : "");
+  $dash.innerHTML = `
+  <div class="dash-inner">
+    <div class="gauge-head">
+      <span class="glabel">Давление проекта</span>
+      <span>
+        <span class="gval">${S.project}<span class="of"> / ${MAX}</span></span>
+        <span class="gdelta ${S.lastDelta>0?"up":"down"} ${deltaTxt?"show":""}">${deltaTxt}</span>
+      </span>
+    </div>
+    <div class="gauge" role="img" aria-label="Проект: ${S.project} из ${MAX}">
+      <div class="zone safe"></div><div class="zone hot"></div>
+      ${[10,20,30,40].map(t=>`<div class="tick" style="left:${t/MAX*100}%"></div>`).join("")}
+      <div class="fill" style="width:${pct}%"></div>
+      <div class="marker" style="left:calc(${pct}% - 2px)"></div>
+    </div>
+    <div class="gauge-legend">
+      <span class="start">≤ ${WIN_AT} — процесс откачен, консультация заново</span>
+      <span class="end">${MAX} — точка невозврата</span>
+    </div>
+    ${S.project >= MAX && S.phase !== "final" ? `<div class="crisis">⚠ Проект на отметке ${MAX}: если община сейчас не откатит его, партия закончится точкой невозврата</div>` : (S.project >= CRISIS_AT ? `<div class="crisis">⚠ Кризис: проект в шаге от точки невозврата</div>` : "")}
+    <div class="dash-row">
+      ${Object.entries(RESOURCES).map(([k,r])=>`
+        <div class="res ${S.res[k]===0?"drained":""}" title="${r.hint}">
+          ${ICONS[k]}
+          <div>
+            <div class="rname">${r.label}</div>
+            <div class="rpips">${[1,2,3].map(i=>`<span class="pip ${S.res[k]>=i?"":"off"}"></span>`).join("")}</div>
+          </div>
+        </div>`).join("")}
+    </div>
+    <div class="vio-strip">
+      <div class="vhead">Открытые нарушения <span class="vcount">${vios.length}</span>
+        <span style="color:var(--paper-faint);text-transform:none;letter-spacing:0">· каждое даёт проекту +${DRIFT_PER_VIOLATION} в начале раунда</span>
+      </div>
+      ${vios.length
+        ? `<div class="vio-tags">${vios.map(v=>`<span class="vio-tag" title="${VIOLATIONS[v].principle}">${VIOLATIONS[v].label}</span>`).join("")}</div>`
+        : `<div class="vio-none">Открытых нарушений нет</div>`}
+    </div>
+  </div>`;
+}
+
+function effLines(dp, opens, closes){
+  let h = "";
+  if (dp > 0) h += `<div class="eff up"><span class="esign">+${dp}</span><span class="edesc">проект продвинулся</span></div>`;
+  if (dp < 0) h += `<div class="eff down"><span class="esign">${dp}</span><span class="edesc">проект откатился</span></div>`;
+  if (dp === 0) h += `<div class="eff"><span class="esign">±0</span><span class="edesc">шкала проекта не изменилась</span></div>`;
+  (opens||[]).forEach(v => h += `<div class="eff vio-open"><span class="esign">⚑</span><span class="edesc">открыто нарушение: <b style="color:var(--kapok)">${VIOLATIONS[v].label}</b></span></div>`);
+  (closes||[]).forEach(v => h += `<div class="eff vio-close"><span class="esign">✓</span><span class="edesc">закрыто нарушение: ${VIOLATIONS[v].label}</span></div>`);
+  return `<div class="effects">${h}</div>`;
+}
+
+function renderMain(){
+  const st = story();
+  let h = "";
+
+  if (S.phase === "start"){
+    h = `
+    <div class="scene">
+      <div class="eyebrow">Брифинг <span class="stage">· перед партией</span></div>
+      <h2>Вы — община Сараяку</h2>
+      <p>Государство выдало нефтяную концессию на вашей родовой территории —
+      без предварительной консультации. Поэтому игра начинается не с нуля:
+      давление проекта уже <b>${START} из ${MAX}</b>, и одно нарушение уже открыто.</p>
+      <div class="recognize"><b>Цель общины</b>
+      Не дать проекту дойти до точки невозврата (${MAX}) — а если получится,
+      откатить его до ${WIN_AT} и ниже, чтобы настоящая свободная, предварительная
+      и информированная консультация началась заново.</div>
+      <p class="dim"><b>Как устроен раунд.</b> Сначала — инерция: проект сам ползёт вперёд
+      (+${DRIFT_BASE}, плюс +${DRIFT_PER_VIOLATION} за каждое открытое нарушение — незакрытые
+      нарушения работают на компанию). Затем ходит компания. Затем община отвечает,
+      тратя ресурсы. У общины по 3 единицы каждого из четырёх ресурсов на всю партию —
+      их не хватит на всё, придётся выбирать.</p>
+      <p class="dim"><b>Роли онлайн.</b> Фасилитатор ведёт игру и озвучивает ходы компании
+      (или отдаёт их части группы). Община обсуждает и выбирает ответ голосованием.</p>
+      <div class="nav-btns">
+        <button class="btn primary" onclick="goStory(0)">Начать партию</button>
+      </div>
+    </div>`;
+  }
+
+  else if (S.phase === "story"){
+    h = `
+    <div class="scene">
+      <div class="eyebrow">${st.trap} <span class="stage">· ${st.stage} · раунд ${S.storyIdx+1} из ${STORIES.length}</span></div>
+      <h2>${st.title}</h2>
+      ${S.driftApplied ? `<div class="drift-note">⏱ Инерция проекта: <b>+${S.driftApplied}</b> — время работает на компанию${S.violations.size ? ` (открытых нарушений: ${S.violations.size})` : ""}</div>` : ""}
+      <p>${st.intro}</p>
+      <div class="recognize"><b>Что здесь распознать</b>${st.recognize}</div>
+      <div class="choices">
+        <h3><span class="actor-tag company">Ход компании</span></h3>
+        ${st.companyMoves.map((m,i)=>`
+          <button class="choice company" onclick="chooseCompany(story().companyMoves[${i}])">
+            <span class="cbadge">${m.key}</span>
+            <span class="ctext"><span class="clabel">${m.label}</span></span>
+            <span class="cdp ${m.dp>0?"up":"down"}">${m.dp>0?"+"+m.dp:m.dp}</span>
+          </button>`).join("")}
+      </div>
+    </div>`;
+  }
+
+  else if (S.phase === "companyResult"){
+    const m = S.chosenCompany;
+    h = `
+    <div class="scene">
+      <div class="eyebrow"><span class="actor-tag company">Компания · ход ${m.key}</span></div>
+      <h2>${m.label}</h2>
+      <p>${m.result}</p>
+      ${effLines(m.dp, m.opens, m.closesByCompany)}
+      ${m.lesson ? `<div class="lesson"><b>Механика ловушки</b>${m.lesson}</div>` : ""}
+      <div class="nav-btns">
+        <button class="btn primary" onclick="S.phase='community';render()">Ответ общины →</button>
+      </div>
+    </div>`;
+  }
+
+  else if (S.phase === "community"){
+    h = `
+    <div class="scene">
+      <div class="eyebrow"><span class="actor-tag community">Ход общины</span> <span class="stage">· раунд ${S.storyIdx+1}</span></div>
+      <h2>Как отвечает Сараяку?</h2>
+      <p class="dim">Обсудите варианты. Сильные ответы стоят ресурсов — а ресурсы на всю партию.</p>
+      <div class="choices">
+        ${story().communityActions.map((a,i)=>{
+          const afford = Object.entries(a.cost||{}).every(([r,c]) => S.res[r] >= c);
+          return `
+          <button class="choice community ${afford?"":"disabled"}" ${afford?`onclick="chooseAction(story().communityActions[${i}])"`:`aria-disabled="true" title="Не хватает ресурса"`}>
+            <span class="cbadge">${i+1}</span>
+            <span class="ctext">
+              <span class="clabel">${a.label}</span>
+              <span class="csub">${a.sub}${afford?"":" · ✕ не хватает ресурса"}</span>
+            </span>
+            <span class="cdp">${a.dp<0?a.dp:"±0"}</span>
+          </button>`;}).join("")}
+      </div>
+    </div>`;
+  }
+
+  else if (S.phase === "communityResult"){
+    const a = S.chosenAction;
+    h = `
+    <div class="scene">
+      <div class="eyebrow"><span class="actor-tag community">Община</span></div>
+      <h2>${a.label}</h2>
+      <p>${a.result}</p>
+      ${effLines(a.dp, [], a.closes)}
+      ${Object.keys(a.cost||{}).length ? `<p class="dim">Потрачено: ${Object.entries(a.cost).map(([r,c])=>`${c} ${RESOURCES[r].label}`).join(", ")}.</p>` : ""}
+      <div class="nav-btns">
+        <button class="btn primary" onclick="goSummary()">Итог раунда →</button>
+      </div>
+    </div>`;
+  }
+
+  else if (S.phase === "summary"){
+    h = `
+    <div class="scene">
+      <div class="eyebrow">Итог раунда ${S.storyIdx+1} <span class="stage">· ${story().trap}</span></div>
+      <h2>Где мы оказались</h2>
+      <p class="dim">Состояние партии — на панели выше: давление проекта, ресурсы, открытые нарушения.
+      Помните: каждое открытое нарушение добавит проекту +${DRIFT_PER_VIOLATION} в начале следующего раунда.</p>
+      <div class="debrief-q"><b>Вопрос раунда — обсудите</b><p>${story().debrief}</p></div>
+      <div class="nav-btns">
+        ${S.storyIdx + 1 < STORIES.length
+          ? `<button class="btn primary" onclick="nextStory()">История ${S.storyIdx+2}: ${STORIES[S.storyIdx+1].title} →</button>`
+          : `<button class="btn primary" onclick="goFinal('stop')">К финалу партии →</button>`}
+        <button class="btn ghost" onclick="goFinal('stop')">Остановить партию и перейти к дебрифу</button>
+      </div>
+    </div>`;
+  }
+
+  else if (S.phase === "final"){
+    const v = S.violations.size;
+    let verdict, cls;
+    if (S.finalReason === "loss"){
+      cls = "loss";
+      verdict = "Точка невозврата. Компания продвинула проект быстрее, чем община успела закрыть нарушения согласия. Дальше решают уже не переговоры.";
+    } else if (S.finalReason === "win"){
+      cls = "win";
+      verdict = "Проект откачен. Община вернула процесс достаточно далеко назад, чтобы настоящая консультация могла начаться заново — свободно, предварительно и информированно.";
+    } else {
+      cls = "mid";
+      verdict = "Процесс остался спорным. Проект не дошёл до точки невозврата, но и не был откачен. Качество согласия определяется тем, какие нарушения остались открытыми.";
+    }
+    let quality;
+    if (v === 0) quality = "Нарушений не осталось — процесс можно считать восстановленным, если дальнейшая консультация будет свободной, предварительной и информированной.";
+    else if (v === 1) quality = "Осталось одно нарушение. Процесс спорный, но его ещё можно восстановить.";
+    else if (v <= 3) quality = "Осталось несколько нарушений. Формально процесс мог продолжаться, но качество согласия под вопросом.";
+    else quality = "Осталось много нарушений. Это уже не согласие — это фасад согласия.";
+
+    h = `
+    <div class="scene">
+      <div class="eyebrow">Финал партии</div>
+      <h2>Давление проекта: ${S.project} / ${MAX}</h2>
+      <div class="verdict ${cls}">${verdict}</div>
+      <ul class="final-list">
+        <li><span>Открытых нарушений</span><b style="color:var(--kapok)">${v}</b></li>
+        ${[...S.violations].map(x=>`<li><span style="color:var(--paper-dim)">— ${VIOLATIONS[x].label}</span><span style="color:var(--paper-faint)">${VIOLATIONS[x].principle}</span></li>`).join("")}
+        <li><span>Остаток ресурсов</span><span>${Object.entries(RESOURCES).map(([k,r])=>`${r.label} ${S.res[k]}`).join(" · ")}</span></li>
+      </ul>
+      <div class="lesson"><b>Качество согласия</b>${quality}</div>
+      <div class="debrief-q"><b>Вопросы для дебрифа</b>
+        <ol class="debrief">
+          <li>В какой момент процесс перестал быть свободным?</li>
+          <li>Что сильнее всего двигало проект вперёд — ходы компании или незакрытые нарушения?</li>
+          <li>На что общине не хватило ресурсов? Что бы вы разменяли иначе?</li>
+          <li>Какие нарушения остались открытыми — и почему именно они?</li>
+          <li>Было ли получено согласие — или согласие пытались добыть?</li>
+        </ol>
+      </div>
+      <div class="epilogue"><b>Как это закончилось в реальности</b><p>${EPILOGUE}</p></div>
+      <div class="nav-btns">
+        <button class="btn primary" onclick="startGame()">Начать партию заново</button>
+      </div>
+    </div>`;
+  }
+
+  $main.innerHTML = h;
+  if (S.phase !== "start") window.scrollTo({top: 0});
+}
+
+function renderLog(){
+  if (!S) return;
+  $log.innerHTML = S.log.length
+    ? [...S.log].reverse().map(l=>`
+      <div class="lrow">
+        <span class="lround">${l.round}</span>
+        <span class="lwho ${l.who}">${l.who==="company"?"Компания":l.who==="community"?"Община":"Игра"}</span>
+        <span class="ltext">${esc(l.text)}</span>
+        <span class="ldp ${l.dp>0?"up":l.dp<0?"down":""}">${l.dp>0?"+"+l.dp:l.dp<0?l.dp:""}</span>
+      </div>`).join("")
+    : `<div class="lrow"><span class="ltext">Пока пусто.</span></div>`;
+}
+
+/* ---------- панель фасилитатора ---------- */
+const $fac = document.getElementById("fac");
+document.getElementById("facFab").addEventListener("click", ()=>{
+  $fac.classList.toggle("open");
+  if ($fac.classList.contains("open")) renderFac();
+});
+
+function facAdj(what, d){
+  if (what === "project"){ S.project += d; clampProject(); S.lastDelta = d; addLog("system", `Фасилитатор: проект ${d>0?"+":""}${d}.`, d); }
+  else { S.res[what] = Math.max(0, Math.min(5, S.res[what] + d)); }
+  render(); renderFac();
+}
+function facVio(key, on){
+  on ? S.violations.add(key) : S.violations.delete(key);
+  render(); renderFac();
+}
+function facJump(i){ goStory(i); renderFac(); }
+
+function renderFac(){
+  $fac.innerHTML = `
+    <h4>Панель фасилитатора</h4>
+    <div class="fsec">
+      <div class="flabel">Шкала проекта: ${S.project}</div>
+      <div class="frow">
+        <button class="fbtn" onclick="facAdj('project',-5)">−5</button>
+        <button class="fbtn" onclick="facAdj('project',-1)">−1</button>
+        <button class="fbtn" onclick="facAdj('project',1)">+1</button>
+        <button class="fbtn" onclick="facAdj('project',5)">+5</button>
+      </div>
+    </div>
+    <div class="fsec">
+      <div class="flabel">Ресурсы</div>
+      ${Object.entries(RESOURCES).map(([k,r])=>`
+        <div class="frow"><span class="fname">${r.label}: ${S.res[k]}</span>
+          <button class="fbtn" onclick="facAdj('${k}',-1)">−</button>
+          <button class="fbtn" onclick="facAdj('${k}',1)">+</button>
+        </div>`).join("")}
+    </div>
+    <div class="fsec">
+      <div class="flabel">Нарушения</div>
+      ${Object.entries(VIOLATIONS).map(([k,v])=>`
+        <label class="vtoggle"><input type="checkbox" ${S.violations.has(k)?"checked":""} onchange="facVio('${k}', this.checked)"> ${v.label}</label>`).join("")}
+    </div>
+    <div class="fsec">
+      <div class="flabel">Навигация</div>
+      <div class="frow">
+        ${STORIES.map((s,i)=>`<button class="fbtn" title="${s.title}" onclick="facJump(${i})">И${i+1}</button>`).join("")}
+        <button class="fbtn" onclick="goFinal('stop');renderFac()">Финал</button>
+        <button class="fbtn" style="border-color:rgba(224,83,47,.6);color:var(--achiote-soft)" onclick="if(confirm('Начать партию заново?')){startGame();renderFac()}">Сброс</button>
+      </div>
+    </div>`;
+}
+
+/* ---------- журнал: показать/скрыть ---------- */
+document.getElementById("logToggle").addEventListener("click", function(){
+  const open = !$log.hidden;
+  $log.hidden = open;
+  this.setAttribute("aria-expanded", String(!open));
+  this.textContent = (open ? "▸" : "▾") + " Журнал партии (для дебрифа)";
+});
+
+function render(){ renderDash(); renderMain(); renderLog(); }
+
+startGame();
+</script>
+</body>
+</html>
